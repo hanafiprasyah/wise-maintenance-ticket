@@ -2,10 +2,17 @@
 
 namespace App\Providers;
 
+use App\Models\User;
+use App\Models\Budget;
+use App\Models\Report;
+use App\Models\Maintenance;
+use App\Observers\UserObserver;
+use App\Observers\BudgetObserver;
+use App\Observers\ReportObserver;
+use App\Observers\MaintenanceObserver;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
-use Illuminate\Support\Facades\Event;
 
 class EventServiceProvider extends ServiceProvider
 {
@@ -25,7 +32,10 @@ class EventServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        Maintenance::observe(MaintenanceObserver::class);
+        Budget::observe(BudgetObserver::class);
+        User::observe(UserObserver::class);
+        Report::observe(ReportObserver::class);
     }
 
     /**
