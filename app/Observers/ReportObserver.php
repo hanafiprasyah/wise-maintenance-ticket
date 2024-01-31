@@ -71,7 +71,7 @@ class ReportObserver
             ->actions([
                 Action::make('view')
                     ->button()
-                    ->url(route('filament.wise.resources.reports.index')),
+                    ->url(route('filament.wise.resources.feedback.index')),
             ])
             ->sendToDatabase(User::where('id', $report->id_user)->get());
     }

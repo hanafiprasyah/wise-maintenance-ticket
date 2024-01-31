@@ -6,6 +6,7 @@ use Filament\Pages;
 use Filament\Panel;
 use Filament\Widgets;
 use Filament\PanelProvider;
+use Filament\Facades\Filament;
 use Filament\Support\Colors\Color;
 use Awcodes\Overlook\OverlookPlugin;
 use Illuminate\Support\Facades\Auth;
@@ -30,6 +31,9 @@ use Leandrocfe\FilamentApexCharts\FilamentApexChartsPlugin;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use pxlrbt\FilamentEnvironmentIndicator\EnvironmentIndicatorPlugin;
 use Tapp\FilamentAuthenticationLog\FilamentAuthenticationLogPlugin;
+use Althinect\FilamentSpatieRolesPermissions\Resources\RoleResource;
+use Tapp\FilamentAuthenticationLog\Resources\AuthenticationLogResource;
+use Althinect\FilamentSpatieRolesPermissions\Resources\PermissionResource;
 use ShuvroRoy\FilamentSpatieLaravelHealth\FilamentSpatieLaravelHealthPlugin;
 use Althinect\FilamentSpatieRolesPermissions\FilamentSpatieRolesPermissionsPlugin;
 
@@ -42,12 +46,13 @@ class WisePanelProvider extends PanelProvider
             ->login()
             ->path('')
             ->default()
-            ->profile()
+            ->id('wise')
             ->passwordReset()
+            ->authGuard('web')
             ->font('Quicksand')
             ->emailVerification()
             ->databaseNotifications()
-            ->id('wise')->authGuard('web')
+            ->profile(isSimple: false)
             ->brandName('WISE Ticket App')
             ->sidebarCollapsibleOnDesktop()
             ->favicon(asset('favicon.ico'))
@@ -78,7 +83,7 @@ class WisePanelProvider extends PanelProvider
             ])
             ->widgets([
                 Widgets\AccountWidget::class,
-                Widgets\FilamentInfoWidget::class,
+                // Widgets\FilamentInfoWidget::class,
                 // Addons
                 OverlookWidget::class,
             ])
@@ -89,11 +94,11 @@ class WisePanelProvider extends PanelProvider
                 FilamentSpatieRolesPermissionsPlugin::make(),
                 QuickCreatePlugin::make()
                     // ->hidden(fn () => Filament::getTenant()->requiresOnboarding())
-                    // ->excludes([
-                    //     PermissionResource::class,
-                    //     RoleResource::class,
-                    //     AuthenticationLogResource::class,
-                    // ])
+                    ->excludes([
+                        PermissionResource::class,
+                        RoleResource::class,
+                        AuthenticationLogResource::class,
+                    ])
                     ->slideOver(),
                 MaintenanceSwitchPlugin::make(),
                 SpotlightPlugin::make(),
@@ -114,16 +119,16 @@ class WisePanelProvider extends PanelProvider
                     }),
                 OverlookPlugin::make()
                     ->sort(2)
-                    // ->excludes([
-                    //     \App\Filament\Resources\UserResource::class,
-                    //     \App\Filament\Resources\ItemResource::class,
-                    //     \App\Filament\Resources\CausedResource::class,
-                    //     \App\Filament\Resources\ResortResource::class,
-                    //     \App\Filament\Resources\ProblemResource::class,
-                    //     PermissionResource::class,
-                    //     RoleResource::class,
-                    //     AuthenticationLogResource::class,
-                    // ])
+                    ->excludes([
+                        \App\Filament\Resources\UserResource::class,
+                        \App\Filament\Resources\ItemResource::class,
+                        \App\Filament\Resources\CausedResource::class,
+                        \App\Filament\Resources\ResortResource::class,
+                        \App\Filament\Resources\ProblemResource::class,
+                        PermissionResource::class,
+                        RoleResource::class,
+                        AuthenticationLogResource::class,
+                    ])
                     ->alphabetical()
                     ->columns([
                         'default' => 2,

@@ -15,6 +15,7 @@ class Kernel extends ConsoleKernel
     {
         $schedule->command('auth:clear-resets')->everyFifteenMinutes();
         $schedule->command(ScheduleCheckHeartbeatCommand::class)->everyMinute();
+        $schedule->command('activitylog:clean')->yearly();
     }
 
     /**
