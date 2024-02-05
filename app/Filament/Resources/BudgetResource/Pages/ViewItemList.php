@@ -206,7 +206,7 @@ class ViewItemList extends ViewRecord
                                     $budget->rejectBudget();
                                 })
                                 ->slideOver()
-                                ->tooltip(__('filament-panels::pages/budget.action.group.tooltip.rejected')),
+                                ->tooltip('Reject this Budget'),
                             Action::make('Approve')
                                 ->icon('heroicon-o-check-badge')
                                 ->color('success')
@@ -223,7 +223,7 @@ class ViewItemList extends ViewRecord
                                 ->action(function (Budget $budget) {
                                     $budget->approveBudget();
                                 })
-                                ->tooltip(__('filament-panels::pages/budget.action.group.tooltip.approve')),
+                                ->tooltip('Approve this Budget'),
                         ])
                             ->fullWidth(),
                     ]),

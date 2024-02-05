@@ -35,7 +35,7 @@ class CausedResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return __('filament-panels::pages/caused.title');
+        return __('Causeds');
     }
 
     public static function shouldRegisterNavigation(): bool

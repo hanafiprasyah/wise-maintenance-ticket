@@ -19,6 +19,8 @@ class CreateBudget extends CreateRecord
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $data['editor'] = auth()->user()->name;
+        $data['status'] = 'Pending';
+        $data['taxes'] = 0;
         $data['item_subtotal'] = $data['subtotal'] - $data['transport'];
 
         return $data;
@@ -27,35 +29,5 @@ class CreateBudget extends CreateRecord
     protected function getCreatedNotificationTitle(): ?string
     {
         return 'New budget created';
-    }
-
-    protected function beforeFill(): void
-    {
-        // Runs before the form fields are populated with their default values.
-    }
-
-    protected function afterFill(): void
-    {
-        // Runs after the form fields are populated with their default values.
-    }
-
-    protected function beforeValidate(): void
-    {
-        // Runs before the form fields are validated when the form is submitted.
-    }
-
-    protected function afterValidate(): void
-    {
-        // Runs after the form fields are validated when the form is submitted.
-    }
-
-    protected function beforeCreate(): void
-    {
-        // Runs before the form fields are saved to the database.
-    }
-
-    protected function afterCreate(): void
-    {
-        // Runs after the form fields are saved to the database.
     }
 }

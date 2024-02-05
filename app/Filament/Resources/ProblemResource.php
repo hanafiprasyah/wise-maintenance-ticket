@@ -35,7 +35,7 @@ class ProblemResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return __('filament-panels::pages/problem.title');
+        return __('Problems');
     }
 
     public static function shouldRegisterNavigation(): bool

@@ -49,12 +49,12 @@ class MaintenanceResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return __('filament-panels::pages/maintenance.title');
+        return __('Problem Ticket');
     }
 
     public static function getModelLabel(): string
     {
-        return __('filament-panels::pages/maintenance.title');
+        return __('Problem Ticket');
     }
 
     public static function shouldRegisterNavigation(): bool
@@ -71,30 +71,30 @@ class MaintenanceResource extends Resource
         return $form
             ->schema([
                 Forms\Components\Select::make('id_site')
-                    ->label(__('filament-panels::pages/maintenance.form.site.label'))
+                    ->label('Site/Area')
                     ->options(Site::all()->pluck('name', 'id'))
                     ->preload()
                     ->required()
                     ->searchable()
                     ->live()
                     ->validationMessages([
-                        'required' => __('filament-panels::pages/maintenance.validation.required.site')
+                        'required' => __('Please select one site/area')
                     ]),
                 Forms\Components\Select::make('pic')
-                    ->label(__('filament-panels::pages/maintenance.form.pic.label'))
+                    ->label('Site PIC')
                     ->options(Contact::all()->pluck('name', 'name'))
                     ->preload()
                     ->required()
                     ->searchable()
                     ->validationMessages([
-                        'required' => __('filament-panels::pages/maintenance.validation.required.pic')
+                        'required' => __('Please select PIC at the site/area')
                     ]),
                 Forms\Components\Section::make('Analyzing')
                     ->description('You can tell us what you experienced. So that we can follow up on the problem')
                     ->icon('heroicon-m-magnifying-glass-circle')
                     ->schema([
                         Forms\Components\Select::make('problem')
-                            ->label(__('filament-panels::pages/maintenance.form.problem.label'))
+                            ->label('Problem')
                             ->options(Problem::all()->pluck('name', 'name'))
                             ->preload()
                             ->required()
@@ -102,7 +102,7 @@ class MaintenanceResource extends Resource
                             ->multiple()
                             ->columnSpanFull()
                             ->validationMessages([
-                                'required' => __('filament-panels::pages/maintenance.validation.required.problem')
+                                'required' => __('Please tell us the problem')
                             ]),
                     ]),
                 Forms\Components\Select::make('status')
@@ -117,7 +117,7 @@ class MaintenanceResource extends Resource
                     ->hiddenOn('create')
                     ->helperText('Keep this blank if it just started'),
                 Forms\Components\Textarea::make('note')
-                    ->label(__('filament-panels::pages/maintenance.form.note.label'))
+                    ->label('Note (Optional)')
                     ->autosize()
                     ->columnSpanFull(),
             ]);
@@ -137,16 +137,16 @@ class MaintenanceResource extends Resource
             ->recordAction(null)
             ->columns([
                 IconColumn::make('is_open')
-                    ->label(__('filament-panels::pages/maintenance.table.open.label'))
+                    ->label('Progress')
                     ->alignment(Alignment::Center)
                     ->boolean()
                     ->tooltip(fn (string $state): string => match ($state) {
-                        '0' => __('filament-panels::pages/maintenance.table.open.tooltip.row1'),
-                        '1' => __('filament-panels::pages/maintenance.table.open.tooltip.row2')
+                        '0' => __('Closed'),
+                        '1' => __('Open')
                     })
                     ->boolean(),
                 TextColumn::make('site.name')
-                    ->label(__('filament-panels::pages/maintenance.table.site.label'))
+                    ->label('Site/Area')
                     ->searchable()
                     ->default('-')
                     ->description(fn (Maintenance $record): string => $record->site->resort->name),
@@ -155,7 +155,6 @@ class MaintenanceResource extends Resource
                     ->searchable()
                     ->wrap(),
                 FilamentPhoneNumbers\Columns\PhoneNumberColumn::make('contact.phone')
-                    // ->displayFormat(FilamentPhoneNumbers\Enums\PhoneFormat::INTERNATIONAL)
                     ->region('ID')
                     ->badge()
                     ->hidden(function (): bool {
@@ -168,14 +167,14 @@ class MaintenanceResource extends Resource
                     ->color('lime')
                     ->dial(),
                 TextColumn::make('ticket')
-                    ->label(__('filament-panels::pages/maintenance.table.ticket.label'))
+                    ->label('Ticket ID')
                     ->badge()
                     ->searchable()
                     ->color('info')
                     ->wrap()
                     ->copyable(),
                 TextColumn::make('status')
-                    ->label('Status')
+                    ->label('Ticket Status')
                     ->badge()
                     ->default('Unresolved by Helpdesk')
                     ->color(fn (string $state): string => match ($state) {
@@ -198,7 +197,7 @@ class MaintenanceResource extends Resource
                     ->searchable()
                     ->color('primary'),
                 TextColumn::make('note')
-                    ->label(__('filament-panels::pages/maintenance.table.note.label'))
+                    ->label('Note')
                     ->hidden(function (): bool {
                         /** @disregard [OPTIONAL CODE] [OPTIONAL DESCRIPTION] */
                         if (Auth::user()->hasRole(['DACSO']))
@@ -229,14 +228,14 @@ class MaintenanceResource extends Resource
                     })
                     ->color('danger'),
                 TextColumn::make('created_at')
-                    ->label(__('filament-panels::pages/maintenance.table.created.label'))
+                    ->label('Reported at')
                     ->wrap()
                     ->dateTime()
                     ->sortable()
                     ->default('-')
                     ->description(fn (Maintenance $record): string => $record->updated_at ==
                         null ? '-'
-                        : __('filament-panels::pages/maintenance.table.created.update') . Carbon::create($record->updated_at)->diffForHumans()),
+                        : __('Last updated ') . Carbon::create($record->updated_at)->diffForHumans()),
             ])
             ->filters([
                 //
@@ -244,13 +243,23 @@ class MaintenanceResource extends Resource
             ->actions([
                 ActionGroup::make([
                     Tables\Actions\EditAction::make(),
-                    Tables\Actions\DeleteAction::make(),
+                    Tables\Actions\DeleteAction::make()
+                        ->hidden(function (Maintenance $record): bool {
+                            if ($record->is_open == 0) {
+                                return false;
+                            } else {
+                                return true;
+                            }
+                        }),
                     Action::make('close')
                         ->icon($closeIcon)
                         ->color('primary')
-                        ->hidden(function (): bool {
+                        ->hidden(function (Maintenance $record): bool {
                             /** @disregard [OPTIONAL CODE] [OPTIONAL DESCRIPTION] */
                             if (Auth::user()->hasPermissionTo('update-close-ticket Maintenance')) {
+                                if ($record->is_open == 0) {
+                                    return true;
+                                }
                                 return false;
                             } else {
                                 return true;
@@ -258,12 +267,12 @@ class MaintenanceResource extends Resource
                         })
                         ->disabled(function (Maintenance $record): bool {
                             if ($record->status == 'Finished') {
-                                return false;
-                            } else {
                                 return true;
+                            } else {
+                                return false;
                             }
                         })
-                        ->label(__('filament-panels::pages/maintenance.action.close_activity.label'))
+                        ->label('Close Ticket')
                         ->requiresConfirmation()
                         ->action(function (Maintenance $maintenance) {
                             $maintenance->closeMaintenance();
@@ -278,9 +287,12 @@ class MaintenanceResource extends Resource
                                 return false;
                             }
                         })
-                        ->hidden(function (): bool {
+                        ->hidden(function (Maintenance $record): bool {
                             /** @disregard [OPTIONAL CODE] [OPTIONAL DESCRIPTION] */
                             if (Auth::user()->hasPermissionTo('mark-as-done Maintenance')) {
+                                if ($record->is_open == 0) {
+                                    return true;
+                                }
                                 return false;
                             } else {
                                 return true;
@@ -294,9 +306,12 @@ class MaintenanceResource extends Resource
                     Action::make('status')
                         ->icon($statusIcon)
                         ->color('purple')
-                        ->hidden(function (): bool {
+                        ->hidden(function (Maintenance $record): bool {
                             /** @disregard [OPTIONAL CODE] [OPTIONAL DESCRIPTION] */
                             if (Auth::user()->hasPermissionTo('update Maintenance')) {
+                                if ($record->is_open == 0) {
+                                    return true;
+                                }
                                 return false;
                             } else {
                                 return true;
@@ -312,7 +327,7 @@ class MaintenanceResource extends Resource
                                     'Send Unit to Factory' => 'Send Unit to Factory',
                                     'Packaging' => 'Packaging',
                                     'Need to Service Onsite' => 'Need to Service Onsite',
-                                    'Finished' => 'Finished',
+                                    // 'Finished' => 'Finished',
                                 ])
                                 ->required()
                         ])
@@ -377,22 +392,16 @@ class MaintenanceResource extends Resource
                             }, 'WISETicketApp-FinalReport-' . $record->ticket . '.pdf');
                         }),
                 ])
-                    ->tooltip(__('filament-panels::pages/maintenance.action.tooltip')),
+                    ->tooltip('Actions'),
                 Action::make('fetch')
                     ->label('Dispatch to EOS')
                     ->icon('heroicon-m-paper-airplane')
                     ->iconPosition(IconPosition::After)
                     ->button()
                     ->requiresConfirmation()
-                    ->visible(function (Maintenance $record): string {
-                        if ($record->dispatch_status != null)
-                            return false;
-                        else
-                            return true;
-                    })
-                    ->hidden(function (): bool {
+                    ->hidden(function (Maintenance $record): bool {
                         /** @disregard [OPTIONAL CODE] [OPTIONAL DESCRIPTION] */
-                        if (auth()->user()->hasPermissionTo('dispatch-ticket Maintenance')) {
+                        if (Auth::user()->hasPermissionTo('dispatch-ticket Maintenance')  && $record->dispatch_status == null) {
                             return false;
                         } else {
                             return true;
@@ -424,8 +433,8 @@ class MaintenanceResource extends Resource
                 ]),
             ])
             ->defaultPaginationPageOption(25)
-            ->emptyStateHeading(__('filament-panels::pages/maintenance.state.empty.heading'))
-            ->emptyStateDescription(__('filament-panels::pages/maintenance.state.empty.description'));
+            ->emptyStateHeading('No ticket found')
+            ->emptyStateDescription('Ticket list will appear here.');
     }
 
     public static function getPages(): array

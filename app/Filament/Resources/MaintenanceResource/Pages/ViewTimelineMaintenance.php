@@ -61,19 +61,22 @@ class ViewTimelineMaintenance extends ViewRecord
                             ->iconColor('success')
                             ->send();
                     }),
-                ActionPage::make('createTimeline')
-                    ->icon('heroicon-o-plus')
+                ActionPage::make('progress')
+                    ->label('Confirm Progress')
+                    ->icon('heroicon-o-hand-thumb-up')
                     ->color('primary')
-                    ->visible(function (): bool {
+                    ->hidden(function (): bool {
+                        $findIdOnTimelineTicket = TimelineMaintenance::where('id_maintenance', $this->record->id)->count();
+
                         /** @disregard [OPTIONAL CODE] [OPTIONAL DESCRIPTION] */
-                        if (Auth::user()->hasRole(['Super Admin', 'Engineer', 'Helpdesk']) && $this->record->is_open == 1)
-                            return true;
-                        else
+                        if (empty($findIdOnTimelineTicket) && Auth::user()->hasRole(['Super Admin', 'Engineer']))
                             return false;
+                        else
+                            return true;
                     })
                     ->form([
                         Forms\Components\Select::make('caused')
-                            ->label(__('filament-panels::pages/maintenance.form.caused.label'))
+                            ->label('Caused by')
                             ->options(Caused::all()->pluck('name', 'name'))
                             ->preload()
                             ->required()
@@ -81,7 +84,7 @@ class ViewTimelineMaintenance extends ViewRecord
                             ->multiple()
                             ->columnSpanFull()
                             ->validationMessages([
-                                'required' => __('filament-panels::pages/maintenance.validation.required.caused')
+                                'required' => __('Please fill in the cause of the problem that occurred')
                             ]),
                         Forms\Components\Select::make('type')
                             ->label('Type of Work')
@@ -128,7 +131,7 @@ class ViewTimelineMaintenance extends ViewRecord
                         ]);
 
                         Notification::make()
-                            ->title('New timeline created')
+                            ->title('Progress confirmation created')
                             ->icon('heroicon-o-arrow-path')
                             ->iconColor('success')
                             ->send();

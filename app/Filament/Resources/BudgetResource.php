@@ -49,12 +49,12 @@ class BudgetResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return __('filament-panels::pages/budget.title');
+        return __('Budget');
     }
 
     public static function getModelLabel(): string
     {
-        return __('filament-panels::pages/budget.title');
+        return __('Budget');
     }
 
     public static function shouldRegisterNavigation(): bool
@@ -73,7 +73,7 @@ class BudgetResource extends Resource
         return $form
             ->schema([
                 Forms\Components\Select::make('id_maintenance')
-                    ->label(__('filament-panels::pages/budget.form.ticket.label'))
+                    ->label('Ticket ID')
                     ->options(
                         Maintenance::where('is_open', '1')
                             ->where(function ($query) {
@@ -82,28 +82,15 @@ class BudgetResource extends Resource
                             })
                             ->pluck('ticket', 'id')
                     )
-                    ->placeholder(__('filament-panels::pages/budget.form.ticket.placeholder'))
+                    ->placeholder('Select ticket')
                     ->selectablePlaceholder(false)
                     ->suffixIcon('heroicon-m-tag')
                     ->preload()
                     ->searchable()
                     ->required()
                     ->disabledOn('edit')
-                    ->helperText(__('filament-panels::pages/budget.form.ticket.helper'))
+                    ->helperText('This field only display Open Progress Ticket ID')
                     ->unique(ignorable: fn ($record) => $record),
-                Forms\Components\TextInput::make('editor')
-                    ->label(__('filament-panels::pages/budget.form.editor.label'))
-                    ->required()
-                    ->hiddenOn('create')
-                    ->helperText(__('filament-panels::pages/budget.form.editor.helper')),
-                Forms\Components\TextInput::make('status')
-                    ->label(__('filament-panels::pages/budget.form.status.label'))
-                    ->required()
-                    ->readOnly()
-                    ->visible(false)
-                    ->default('Pending')
-                    ->placeholder('Budget is being proposed')
-                    ->helperText(__('filament-panels::pages/budget.form.status.helper')),
                 Forms\Components\Section::make('Service Fee')
                     ->columns(1)
                     ->schema([
@@ -151,7 +138,7 @@ class BudgetResource extends Resource
                             ->label('Select what you need')
                             ->schema([
                                 Forms\Components\Select::make('item_id')
-                                    ->label(__('filament-panels::pages/budget.form.items.label'))
+                                    ->label('Item')
                                     ->options(
                                         $items->mapWithKeys(function (Item $item) {
                                             return [$item->id => sprintf('%s', $item->name, $item->price_int)];
@@ -161,7 +148,6 @@ class BudgetResource extends Resource
                                     ->searchable()
                                     ->live(debounce: 500, onBlur: true)
                                     ->preload()
-                                    ->helperText(__('filament-panels::pages/budget.form.items.helper'))
                                     ->disableOptionWhen(function ($value, $state, Get $get) {
                                         return collect($get('../*.item_id'))
                                             ->reject(fn ($id) => $id == $state)
@@ -187,7 +173,7 @@ class BudgetResource extends Resource
                             ->collapsible(),
                     ]),
                 Forms\Components\Section::make('Total Budget')
-                    ->columns(3)
+                    ->columns(1)
                     ->schema([
                         Forms\Components\TextInput::make('subtotal')
                             ->numeric()
@@ -201,13 +187,13 @@ class BudgetResource extends Resource
                             ->required()
                             ->numeric()
                             ->default(0)
-                            ->readOnlyOn('create')
+                            ->hiddenOn('create')
                             ->live(debounce: 500, onBlur: true)
                             ->afterStateUpdated(function (Get $get, Set $set) {
                                 self::updateTotals($get, $set);
                             }),
                         Forms\Components\TextInput::make('value')
-                            ->label(__('filament-panels::pages/budget.form.value.label'))
+                            ->label('Total Price')
                             ->numeric()
                             ->readOnlyOn('create')
                             ->prefix('Rp.'),
@@ -226,13 +212,13 @@ class BudgetResource extends Resource
             ->recordAction(null)
             ->columns([
                 TextColumn::make('maintenance.ticket')
-                    ->label(__('filament-panels::pages/budget.table.ticket.label'))
+                    ->label('Ticket ID')
                     ->badge()
                     ->copyable()
                     ->searchable()
                     ->color('info'),
                 IconColumn::make('status')
-                    ->default(__('filament-panels::pages/budget.table.status.default_str'))
+                    ->default('Budget Status')
                     ->icon(fn (string $state): string => match ($state) {
                         'Rejected' => 'heroicon-o-x-mark',
                         'Pending' => 'heroicon-o-clock',
@@ -245,12 +231,12 @@ class BudgetResource extends Resource
                         default => 'gray',
                     })
                     ->tooltip(fn (string $state): string => match ($state) {
-                        'Pending' => __('filament-panels::pages/budget.table.status.tooltip.row1'),
-                        'Rejected' => __('filament-panels::pages/budget.table.status.tooltip.row2'),
-                        'Approve' => __('filament-panels::pages/budget.table.status.tooltip.row3'),
+                        'Pending' => __('Pending'),
+                        'Rejected' => __('Rejected'),
+                        'Approve' => __('Approve'),
                     }),
                 TextColumn::make('value')
-                    ->label(__('filament-panels::pages/budget.table.value.label'))
+                    ->label('Total Price')
                     ->currency('IDR')
                     ->hidden(function (): bool {
                         /** @disregard [OPTIONAL CODE] [OPTIONAL DESCRIPTION] */
@@ -260,19 +246,19 @@ class BudgetResource extends Resource
                             return true;
                     }),
                 TextColumn::make('editor')
-                    ->label(__('filament-panels::pages/budget.table.editor.label'))
+                    ->label('Submit by')
                     ->wrap(),
                 TextColumn::make('created_at')
-                    ->label(__('filament-panels::pages/budget.table.created.label'))
+                    ->label('Submit on')
                     ->wrap()
                     ->dateTime()
                     ->sortable()
                     ->default('-')
-                    ->description(fn (Budget $record): string => __('filament-panels::pages/budget.table.created.update') . Carbon::create($record->updated_at)->diffForHumans()),
+                    ->description(fn (Budget $record): string => __('Last updated on') . Carbon::create($record->updated_at)->diffForHumans()),
             ])
             ->filters([
                 SelectFilter::make('editor')
-                    ->label(__('filament-panels::pages/budget.filter_label'))
+                    ->label('Editor')
                     ->options(User::where('level', 'Helpdesk')->pluck('name', 'id')),
             ])
             ->actions([
@@ -310,7 +296,7 @@ class BudgetResource extends Resource
                         })
                         ->tooltip('Download Budget Review'),
                 ])
-                    ->tooltip(__('filament-panels::pages/budget.action.tooltip')),
+                    ->tooltip('Actions'),
                 ActionTable::make('item')
                     ->label('Detail')
                     ->icon('heroicon-o-eye')
@@ -341,8 +327,8 @@ class BudgetResource extends Resource
                 ]),
             ])
             ->defaultPaginationPageOption(25)
-            ->emptyStateHeading(__('filament-panels::pages/budget.state.empty.heading'))
-            ->emptyStateDescription(__('filament-panels::pages/budget.state.empty.description'));
+            ->emptyStateHeading('No budget found')
+            ->emptyStateDescription('Budget list will appear here.');
     }
 
     public static function getPages(): array

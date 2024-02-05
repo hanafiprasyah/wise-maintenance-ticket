@@ -23,7 +23,7 @@ class BudgetObserver
                     ->button()
                     ->url(route('filament.wise.resources.budgets.index')),
             ])
-            ->sendToDatabase(User::where('level', 'DACSO')->orWhere('level', 'Super Admin')->get());
+            ->sendToDatabase(User::where('level', 'Management')->orWhere('level', 'Super Admin')->get());
     }
 
     /**
@@ -74,7 +74,7 @@ class BudgetObserver
 
         // Send notification to All user about this approval budget
         Notification::make()
-            ->title('Budget has been approved by DACSO!')
+            ->title('Budget has been approved by Management!')
             ->success()
             ->body('Ticket: ' . $budget->maintenance->ticket . ' is ready for the next actions!')
             ->sendToDatabase(User::all());
@@ -104,9 +104,9 @@ class BudgetObserver
 
         // Send notification to Helpdesk and Super Admin user about this rejected budget
         Notification::make()
-            ->title('Budget has been rejected by DACSO!')
+            ->title('Budget has been rejected by Management!')
             ->danger()
-            ->body('Ticket: ' . $budget->maintenance->ticket . ' cannot be made until the new revised proposal budget is approve by DACSO!')
+            ->body('Ticket: ' . $budget->maintenance->ticket . ' cannot be made until the new revised proposal budget is approve by Management!')
             ->actions([
                 Action::make('view')
                     ->button()
@@ -127,9 +127,9 @@ class BudgetObserver
 
         // Send notification to Helpdesk and Admin user about this rejected budget
         Notification::make()
-            ->title('Budget has been pending by DACSO!')
+            ->title('Budget has been pending by Management!')
             ->warning()
-            ->body('Ticket: ' . $budget->maintenance->ticket . ' cannot be made until the proposal budget is approve by DACSO!')
+            ->body('Ticket: ' . $budget->maintenance->ticket . ' cannot be made until the proposal budget is approve by Management!')
             ->actions([
                 Action::make('view')
                     ->button()

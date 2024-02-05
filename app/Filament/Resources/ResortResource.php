@@ -36,7 +36,7 @@ class ResortResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return __('filament-panels::pages/resort.title');
+        return __('Resorts');
     }
 
     public static function shouldRegisterNavigation(): bool

@@ -142,7 +142,7 @@
                             <td>
                                 Responsible Account<br />
                                 {{ $record->account }}<br />
-                                Kepolisian Daerah Jawa Barat
+                                CV. DACSO EKSIM
                             </td>
 
                             <td>

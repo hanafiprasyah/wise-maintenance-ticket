@@ -39,7 +39,7 @@ class UserResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return __('filament-panels::pages/user.title');
+        return __('Users');
     }
 
     public static function shouldRegisterNavigation(): bool

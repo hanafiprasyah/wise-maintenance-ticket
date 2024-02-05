@@ -37,7 +37,7 @@ class SiteResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return __('filament-panels::pages/site.title');
+        return __('Site/Area');
     }
 
     public static function shouldRegisterNavigation(): bool

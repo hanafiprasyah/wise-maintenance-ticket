@@ -34,11 +34,12 @@ class EditBudget extends EditRecord
     protected function mutateFormDataBeforeSave(array $data): array
     {
         $data['item_subtotal'] = $data['subtotal'] - $data['transport'];
+        $data['editor'] = auth()->user()->name;
 
         return $data;
     }
 
-    protected function afterCreate(): void
+    protected function afterSave(): void
     {
         // Runs after the form fields are saved to the database.
         Notification::make()
@@ -50,6 +51,6 @@ class EditBudget extends EditRecord
                     ->button()
                     ->url(route('filament.wise.resources.budgets.index')),
             ])
-            ->sendToDatabase(User::where('level', 'Super Admin')->orWhere('level', 'DACSO')->get());
+            ->sendToDatabase(User::where('level', 'Super Admin')->orWhere('level', 'Management')->get());
     }
 }
